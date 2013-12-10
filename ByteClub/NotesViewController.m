@@ -135,7 +135,7 @@
     UINavigationController *navigationController = segue.destinationViewController;
     NoteDetailsViewController *showNote = (NoteDetailsViewController*) [navigationController viewControllers][0];
     showNote.delegate = self;
-    
+    showNote.session = _session;
 
     if ([segue.identifier isEqualToString:@"editNote"]) {
         

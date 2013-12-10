@@ -14,12 +14,24 @@
 @interface NotesViewController ()<NoteDetailsViewControllerDelegate>
 
 @property (nonatomic, strong) NSArray *notes;
-
+@property (nonatomic, strong) NSURLSession *session;
 
 @end
 
 @implementation NotesViewController
 
+// storyboard calls initWithCoder:
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        // ephemeral doesn't use persistent storage for caches, cookies, or credentials
+        NSURLSessionConfiguration *config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
+        [config setHTTPAdditionalHeaders:@{@"Authorization": [Dropbox apiAuthorizationHeader]}];
+        _session = [NSURLSession sessionWithConfiguration:config];
+    }
+    return self;
+}
 
 - (id)initWithStyle:(UITableViewStyle)style
 {

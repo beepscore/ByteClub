@@ -59,7 +59,9 @@
                 completionHandler:^(NSData *data,
                                     NSURLResponse *response,
                                     NSError *error) {
-                    if (!error) {
+                    if (error) {
+                        NSLog(@"error %@", error);
+                    } else {
                         // cast to more specific type to access statusCode
                         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
                         if (200 == httpResponse.statusCode) {
@@ -73,7 +75,24 @@
                             NSMutableArray *notesFound = [[NSMutableArray alloc] init];
                             
                             if (!jsonError) {
-                                // TODO: More coming here
+                                NSArray *contentsOfRootDirectory = notesJSON[@"contents"];
+                                for (NSDictionary *dict in contentsOfRootDirectory) {
+                                    if (![dict[@"is_dir"] boolValue]) {
+                                        DBFile *note = [[DBFile alloc] initWithJSONData:dict];
+                                        [notesFound addObject:note];
+                                    }
+                                }
+                                [notesFound sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+                                    return [obj1 compare:obj2];
+                                }];
+                                
+                                self.notes = notesFound;
+                                
+                                // update UI on main thread
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                                    [self.tableView reloadData];
+                                });
                             }
                         }
                     }

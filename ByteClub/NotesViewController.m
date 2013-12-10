@@ -51,6 +51,20 @@
 // list files found in the root dir of appFolder
 - (void)notesOnDropbox
 {
+    NSURL *url = [Dropbox appRootURL];
+
+    // dataTask will make a GET request
+    NSURLSessionDataTask *dataTask =
+        [self.session dataTaskWithURL:url
+                    completionHandler:^(NSData *data,
+                            NSURLResponse *response,
+                            NSError *error) {
+                        if (!error) {
+                            // TODO: More coming here!
+                        }
+                    }];
+    // start task
+    [dataTask resume];
 }
 
 - (void)didReceiveMemoryWarning

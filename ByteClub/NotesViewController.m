@@ -52,17 +52,32 @@
 - (void)notesOnDropbox
 {
     NSURL *url = [Dropbox appRootURL];
-
+    
     // dataTask will make a GET request
     NSURLSessionDataTask *dataTask =
-        [self.session dataTaskWithURL:url
-                    completionHandler:^(NSData *data,
-                            NSURLResponse *response,
-                            NSError *error) {
-                        if (!error) {
-                            // TODO: More coming here!
+    [self.session dataTaskWithURL:url
+                completionHandler:^(NSData *data,
+                                    NSURLResponse *response,
+                                    NSError *error) {
+                    if (!error) {
+                        // cast to more specific type to access statusCode
+                        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
+                        if (200 == httpResponse.statusCode) {
+                            NSError *jsonError = nil;
+                            
+                            NSDictionary *notesJSON =
+                            [NSJSONSerialization JSONObjectWithData:data
+                                                            options:NSJSONReadingAllowFragments
+                                                              error:&jsonError];
+                            
+                            NSMutableArray *notesFound = [[NSMutableArray alloc] init];
+                            
+                            if (!jsonError) {
+                                // TODO: More coming here
+                            }
                         }
-                    }];
+                    }
+                }];
     // start task
     [dataTask resume];
 }

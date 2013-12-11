@@ -76,7 +76,38 @@
         _note.path = _filename.text;
         
         // - UPLOAD FILE TO DROPBOX - //
-        [self.delegate noteDetailsViewControllerDoneWithDetails:self];
+        NSURL *url = [Dropbox uploadURLForPath:_note.path];
+        // use mutable request so we can set http method PUT
+        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
+        [request setHTTPMethod:@"PUT"];
+        
+        NSData *noteContents = [_note.contents dataUsingEncoding:NSUTF8StringEncoding];
+        
+        NSURLSessionUploadTask *uploadTask =
+        [_session
+         uploadTaskWithRequest:request
+         fromData:noteContents
+         completionHandler:^(NSData *data,
+                             NSURLResponse *response,
+                             NSError *error) {
+            
+            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+             
+             if (!error
+                 && (200 == httpResponse.statusCode)) {
+
+                 // hybrid completion handling- block calls a delegate
+                 // Tutorial says -
+                 // In a production-level application you could pass a new DBFile object back to the delegate and sync up your persistent data.
+                 // For the purposes of this application, you simply refresh the NotesViewController with a new network call.
+                 [self.delegate noteDetailsViewControllerDoneWithDetails:self];
+
+             } else {
+                 // alert for error saving / updating note
+             }
+         }];
+        
+        [uploadTask resume];
         
     } else {
         UIAlertView *noTextAlert = [[UIAlertView alloc] initWithTitle:@"No text"
